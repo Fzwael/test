@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>io.smallrye</groupId>
+        <artifactId>smallrye-graphql-ui-parent</artifactId>
+        <version>2.5.0</version>
+    </parent>
+    
+    <artifactId>smallrye-graphql-ui-graphiql</artifactId>
+    <packaging>jar</packaging>
+    
+    <name>SmallRye: GraphQL UI :: Graphiql</name>
+    
+    <properties>
+        <path.graphiql>graphql-ui</path.graphiql>
+        <react.version>18.2.0</react.version>
+        <graphiql.version>2.4.7</graphiql.version>
+    </properties>
+    
+    <dependencies>
+        <!-- Here so that dependabot will tell us about an update -->
+        <dependency>
+            <groupId>org.mvnpm</groupId>
+            <artifactId>graphiql</artifactId>
+            <version>${graphiql.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- NOTE: The following dependencies can be uncommented to include
+         the GraphiQL plugin explorer in the project -->
+        <!--        <dependency>-->
+<!--            <groupId>org.mvnpm.at.graphiql</groupId>-->
+<!--            <artifactId>plugin-explorer</artifactId>-->
+<!--            <version>0.3.4</version>-->
+<!--            <scope>provided</scope>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>*</groupId>-->
+<!--                    <artifactId>*</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>org.mvnpm</groupId>
+            <artifactId>react</artifactId>
+            <version>${react.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.mvnpm</groupId>
+            <artifactId>react-dom</artifactId>
+            <version>${react.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+    
+    <build>            
+        <!-- Copy all web content files META-INF folder, and push it though a filter to replace maven properties -->
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/main/webapp</directory>
+                <targetPath>${project.build.directory}/classes/META-INF/resources/${path.graphiql}</targetPath>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.html</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/main/webapp</directory>
+                <targetPath>${project.build.directory}/classes/META-INF/resources/${path.graphiql}</targetPath>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/*.html</exclude>
+                </excludes>
+            </resource>
+        </resources>
+        
+        <plugins>
+            <!-- So we don't have to keep a version of these javascript libs in our repo -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>install-graphiql</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.mvnpm</groupId>
+                                    <artifactId>graphiql</artifactId>
+                                    <version>${graphiql.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.graphiql}/</outputDirectory>
+                                    <includes>**/graphiql.min.js, **/graphiql.min.js.map, **/graphiql.min.css, **/graphiql.min.css.map</includes>
+                                    <fileMappers>
+                                        <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper />
+                                    </fileMappers>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.mvnpm</groupId>
+                                    <artifactId>react</artifactId>
+                                    <version>${react.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.graphiql}/</outputDirectory>
+                                    <includes>**/react.production.min.js</includes>
+                                    <fileMappers>
+                                        <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper />
+                                    </fileMappers>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.mvnpm</groupId>
+                                    <artifactId>react-dom</artifactId>
+                                    <version>${react.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.graphiql}/</outputDirectory>
+                                    <includes>**/react-dom.production.min.js</includes>
+                                    <fileMappers>
+                                        <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper />
+                                    </fileMappers>
+                                </artifactItem>
+                                <!-- NOTE: The following dependencies can be uncommented to include
+         the GraphiQL plugin explorer in the project -->
+<!--                                <artifactItem>-->
+<!--                                    <groupId>org.mvnpm.at.graphiql</groupId>-->
+<!--                                    <artifactId>plugin-explorer</artifactId>-->
+<!--                                    <version>0.3.4</version>-->
+<!--                                    <type>jar</type>-->
+<!--                                    <overWrite>true</overWrite>-->
+<!--                                    <outputDirectory>${project.build.directory}/classes/META-INF/resources/${path.graphiql}/</outputDirectory>-->
+<!--                                    <includes>**/graphiql-plugin-explorer.umd.js</includes>-->
+<!--                                    <fileMappers>-->
+<!--                                        <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper />-->
+<!--                                    </fileMappers>-->
+<!--                                </artifactItem>-->
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        
+    </build>
+    
+</project>
